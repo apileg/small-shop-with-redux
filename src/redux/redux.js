@@ -3,14 +3,10 @@ import { configureStore, createSlice } from "@reduxjs/toolkit";
 const cartSlice = createSlice({
   name: "cart",
   initialState: {
-    isShown: true,
     items: [],
     totalQuantity: 0,
   },
   reducers: {
-    toggleCartButton(state) {
-      state.isShown = !state.isShown;
-    },
     addToCart(state, action) {
       const newItem = action.payload;
       const itemExists = state.items.find((item) => item.id === newItem.id);
@@ -57,15 +53,28 @@ const notificationSlice = createSlice({
   },
 });
 
+const cartUISlice = createSlice({
+  name: "cartUI",
+  initialState: {
+    isShown: true,
+  },
+  reducers: {
+    toggleCartButton(state) {
+      state.isShown = !state.isShown;
+    },
+  }
+});
 const reduxStore = configureStore({
   reducer: {
     cart: cartSlice.reducer,
+    cartUI: cartUISlice.reducer,
     notifications: notificationSlice.reducer,
   },
 });
 
 export const cartActions = cartSlice.actions;
 export const notificationActions = notificationSlice.actions;
+export const cartUIActions = cartUISlice.actions;
 export default reduxStore;
 
 export const sendCartData = (cart) => {

@@ -11,7 +11,7 @@ let isInitial = true;
 function App() {
   const dispatch = useDispatch();
 
-  const isShown = useSelector((state) => state.cart.isShown);
+  const isShown = useSelector((state) => state.cartUI.isShown);
   const cart = useSelector((state) => state.cart);
   const notification = useSelector((state) => state.notifications.notification);
 
