@@ -7,6 +7,10 @@ const cartSlice = createSlice({
     totalQuantity: 0,
   },
   reducers: {
+    replaceCart(state, action) {
+      state.totalQuantity = action.payload.totalQuantity;
+      state.items = action.payload.items;
+    },
     addToCart(state, action) {
       const newItem = action.payload;
       const itemExists = state.items.find((item) => item.id === newItem.id);
@@ -24,6 +28,7 @@ const cartSlice = createSlice({
         itemExists.totalPrice += newItem.price;
       }
       state.totalQuantity++;
+      state.changed = true;
     },
     removeFromCart(state, action) {
       const id = action.payload;
@@ -33,8 +38,10 @@ const cartSlice = createSlice({
         state.items = state.items.filter((item) => item.id !== id);
       } else {
         existingItem.quantity--;
+        existingItem.totalPrice -= existingItem.price;
       }
       state.totalQuantity--;
+      state.changed = true;
     },
   },
 });
@@ -62,8 +69,9 @@ const cartUISlice = createSlice({
     toggleCartButton(state) {
       state.isShown = !state.isShown;
     },
-  }
+  },
 });
+
 const reduxStore = configureStore({
   reducer: {
     cart: cartSlice.reducer,
@@ -116,6 +124,38 @@ export const sendCartData = (cart) => {
           status: "error",
           title: "Error!",
           message: "Sending cart data failed!",
+        })
+      );
+    }
+  };
+};
+
+export const fetchCartData = () => {
+  return async (dispatch) => {
+    const fetchData = async () => {
+      const response = await fetch(
+        "https://cart-project-72d3b-default-rtdb.firebaseio.com/cart.json"
+      );
+      if (!response.ok) {
+        throw new Error("Could not fetch cart data");
+      }
+      const data = await response.json();
+
+      return data;
+    };
+
+    try {
+      const cartData = await fetchData();
+      dispatch(cartActions.replaceCart({
+        items: cartData.items || [],
+        totalQuantity: cartData.totalQuantity || 0,
+      }));
+    } catch (error) {
+      dispatch(
+        notificationActions.showNotification({
+          status: "error",
+          title: "Error!",
+          message: "Fetching cart data failed!",
         })
       );
     }
